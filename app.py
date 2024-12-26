@@ -187,20 +187,40 @@ def search_users():
                 else:
                     result[app_attr] = ''
                 
-            # Check if entry matches all quoted terms exactly
-            matches_quoted_terms = True
+            # Check if entry matches all terms according to their rules
+            matches_all_terms = True
+            
+            # Check quoted terms - must match word boundaries
             for quoted_term in quoted_terms:
                 quoted_term_lower = quoted_term.lower()
                 found_match = False
                 for value in result.values():
-                    if isinstance(value, str) and quoted_term_lower in value.lower():
+                    if not isinstance(value, str):
+                        continue
+                    value_lower = value.lower()
+                    # Look for the term surrounded by non-alphanumeric characters or string boundaries
+                    import re
+                    if re.search(r'\b' + re.escape(quoted_term_lower) + r'\b', value_lower):
                         found_match = True
                         break
                 if not found_match:
-                    matches_quoted_terms = False
+                    matches_all_terms = False
                     break
-                
-            if matches_quoted_terms:
+            
+            # Check unquoted terms - simple substring match
+            if matches_all_terms:  # Only check if quoted terms matched
+                for unquoted_term in unquoted_terms:
+                    unquoted_term_lower = unquoted_term.lower()
+                    found_match = False
+                    for value in result.values():
+                        if isinstance(value, str) and unquoted_term_lower in value.lower():
+                            found_match = True
+                            break
+                    if not found_match:
+                        matches_all_terms = False
+                        break
+            
+            if matches_all_terms:
                 results.append(result)
                 
             
