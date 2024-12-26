@@ -200,7 +200,7 @@ def search_users():
                     value_lower = value.lower()
                     # Look for the term surrounded by non-alphanumeric characters or string boundaries
                     import re
-                    if re.search(r'\b' + re.escape(quoted_term_lower) + r'\b', value_lower):
+                    if re.search(r'\b' + quoted_term_lower + r'\b', value_lower):
                         found_match = True
                         break
                 if not found_match:
