@@ -13,9 +13,12 @@ function searchUsers() {
         .then(response => response.json())
         .then(users => {
             const resultsDiv = document.getElementById('userSearchResults');
+            const selectedUsersSection = document.getElementById('selectedUsersSection');
             if (users.length === 0) {
                 resultsDiv.innerHTML = '<div class="alert alert-info">No users found</div>';
+                selectedUsersSection.style.display = 'none';
             } else {
+                selectedUsersSection.style.display = 'block';
                 resultsDiv.innerHTML = users.map(user => `
                 <div class="user-card ${selectedUsers.has(user.id) ? 'selected' : ''}" 
                      onclick="toggleUser('${user.id}')">
