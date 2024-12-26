@@ -22,10 +22,10 @@ function searchUsers() {
                 resultsDiv.innerHTML = users.map(user => `
                 <div class="user-card ${selectedUsers.has(user.id) ? 'selected' : ''}" 
                      onclick="toggleUser('${user.id}')">
-                    <h5>${user.name}</h5>
-                    <p>${user.email}${user.email.split('@')[0] === user.id ? '' : ` (${user.id})`}<br>
-                    ${user.title}<br>
-                    ${user.department}</p>
+                    <p><strong>${user.name || ''} (${user.id || ''})</strong><br>
+                    ${user.email || ''}<br>
+                    ${user.title || ''}<br>
+                    ${user.department || ''}</p>
                 </div>
             `).join('');
             }
