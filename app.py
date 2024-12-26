@@ -6,6 +6,24 @@ from datetime import datetime
 from ldap3 import Server, Connection, SUBTREE, Tls
 from dotenv import load_dotenv
 
+def extract_quoted_terms(query):
+    """Extract terms enclosed in quotes and return both quoted and unquoted terms"""
+    import re
+    quoted_terms = []
+    unquoted_terms = []
+    
+    # Find all quoted terms (both single and double quotes)
+    pattern = r'(["\'])(.*?)\1|\S+'
+    matches = re.finditer(pattern, query)
+    
+    for match in matches:
+        if match.group(1):  # Quoted term
+            quoted_terms.append(match.group(2))
+        else:  # Unquoted term
+            unquoted_terms.append(match.group(0))
+    
+    return quoted_terms, unquoted_terms
+
 def parse_ldap_mappings():
     """Parse LDAP attribute mappings from environment variable"""
     mapping_str = os.getenv('LDAP_ATTRIBUTES', 'id:cn name:displayName email:mail jobtitle:title department:department uidNumber:uidNumber')
@@ -145,17 +163,20 @@ def search_users():
             attributes=search_attributes
         )
         
+        # Extract quoted terms from the original query
+        quoted_terms, unquoted_terms = extract_quoted_terms(query)
+            
         results = []
         for entry in conn.entries:
             # Check for required attributes
             id_attr = LDAP_ATTR_MAP['id']
             email_attr = LDAP_ATTR_MAP['email']
-            
+                
             if not (hasattr(entry, email_attr) and getattr(entry, email_attr).value and 
                    hasattr(entry, id_attr) and getattr(entry, id_attr).value and 
                    getattr(entry, id_attr).value.lower() not in ['null', 'none', 'undefined']):
                 continue
-                
+                    
             # Build the result dictionary
             result = {}
             for app_attr, ldap_attr in LDAP_ATTR_MAP.items():
@@ -164,8 +185,22 @@ def search_users():
                     result[app_attr] = '' if value in ['null', 'NULL', None, 'undefined', 'UNDEFINED'] else value
                 else:
                     result[app_attr] = ''
-            
-            results.append(result)
+                
+            # Check if entry matches all quoted terms exactly
+            matches_quoted_terms = True
+            for quoted_term in quoted_terms:
+                quoted_term_lower = quoted_term.lower()
+                found_match = False
+                for value in result.values():
+                    if isinstance(value, str) and quoted_term_lower in value.lower():
+                        found_match = True
+                        break
+                if not found_match:
+                    matches_quoted_terms = False
+                    break
+                
+            if matches_quoted_terms:
+                results.append(result)
                 
             
     return jsonify(results)
