@@ -1,12 +1,10 @@
 #! /usr/bin/env python3
 
+import sys, os, ssl
 from flask import Flask, render_template, jsonify, request
 from datetime import datetime
 from ldap3 import Server, Connection, SUBTREE, Tls
-import ssl
 from dotenv import load_dotenv
-import os
-import json
 
 def parse_ldap_mappings():
     """Parse LDAP attribute mappings from environment variable"""
