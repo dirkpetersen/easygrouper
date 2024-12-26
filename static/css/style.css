@@ -45,6 +45,16 @@
     border-radius: 8px;
     padding: 1rem;
     margin-top: 0.5rem;
+    position: relative;
+}
+
+.selected-items:empty::before {
+    content: attr(data-placeholder);
+    color: #6c757d;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .selected-item {
