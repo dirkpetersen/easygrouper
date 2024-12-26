@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import sys, os, ssl
+import sys, os, ssl, re
 from flask import Flask, render_template, jsonify, request
 from datetime import datetime
 from ldap3 import Server, Connection, SUBTREE, Tls
@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 def extract_quoted_terms(query):
     """Extract terms enclosed in quotes and return both quoted and unquoted terms"""
-    import re
     quoted_terms = []
     unquoted_terms = []
     
@@ -118,8 +117,12 @@ def search_users():
     if not query:
         return jsonify([])
     
-    # Split query into words
-    words = query.split()
+    # Extract quoted terms from the original query
+    quoted_terms, unquoted_terms = extract_quoted_terms(query)
+    print(quoted_terms, unquoted_terms)    
+    
+    # get all search words 
+    words = quoted_terms + unquoted_terms
     
     # Build LDAP filter
     search_attrs = [LDAP_ATTR_MAP[attr] for attr in ['id', 'name', 'email', 'jobtitle', 'department']]
@@ -162,10 +165,6 @@ def search_users():
             SUBTREE,
             attributes=search_attributes
         )
-        
-        # Extract quoted terms from the original query
-        quoted_terms, unquoted_terms = extract_quoted_terms(query)
-        print(quoted_terms, unquoted_terms)
             
         results = []
         for entry in conn.entries:
@@ -193,14 +192,15 @@ def search_users():
             # Check quoted terms - must match word boundaries
             for quoted_term in quoted_terms:
                 quoted_term_lower = quoted_term.lower()
+                pattern = fr"(?<!\w){re.escape(quoted_term_lower)}(?!\w)"
                 found_match = False
                 for value in result.values():
                     if not isinstance(value, str):
                         continue
                     value_lower = value.lower()
                     # Look for the term surrounded by non-alphanumeric characters or string boundaries
-                    import re
-                    if re.search(r'\b' + quoted_term_lower + r'\b', value_lower):
+                    if re.search(pattern, value_lower):
+                        print('match', pattern, value_lower)
                         found_match = True
                         break
                 if not found_match:
