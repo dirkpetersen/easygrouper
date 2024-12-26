@@ -165,6 +165,7 @@ def search_users():
         
         # Extract quoted terms from the original query
         quoted_terms, unquoted_terms = extract_quoted_terms(query)
+        print(quoted_terms, unquoted_terms)
             
         results = []
         for entry in conn.entries:
