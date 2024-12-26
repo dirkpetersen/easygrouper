@@ -24,7 +24,7 @@ function searchUsers() {
                      onclick="toggleUser('${user.id}')">
                     <p><strong>${user.name || ''} (${user.id || ''})</strong><br>
                     ${user.email || ''}<br>
-                    ${user.title || ''}<br>
+                    ${user.jobtitle || ''}<br>
                     ${user.department || ''}</p>
                 </div>
             `).join('');
