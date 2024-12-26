@@ -18,10 +18,10 @@
         <div class="container">
             <ul class="nav nav-tabs" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">User Search</button>
+                    <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">Search Users</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button">Group Assignment</button>
+                    <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button">Search Groups</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="recipients-tab" data-bs-toggle="tab" data-bs-target="#recipients" type="button">Recipients</button>
@@ -33,7 +33,7 @@
                 <div class="tab-pane fade show active" id="users">
                     <div class="search-section mb-4">
                         <div class="input-group mt-3">
-                            <input type="text" id="userSearchInput" class="form-control" placeholder="Search users..." onkeypress="if(event.key === 'Enter') searchUsers()">
+                            <input type="text" id="userSearchInput" class="form-control me-2" placeholder="Search users..." onkeypress="if(event.key === 'Enter') searchUsers()">
                             <button class="btn btn-primary" type="button" onclick="searchUsers()">Search</button>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                 <div class="tab-pane fade" id="groups">
                     <div class="search-section mb-4">
                         <div class="input-group mt-3">
-                            <input type="text" id="groupSearchInput" class="form-control" placeholder="Search groups..." onkeypress="if(event.key === 'Enter') searchGroups()">
+                            <input type="text" id="groupSearchInput" class="form-control me-2" placeholder="Search groups..." onkeypress="if(event.key === 'Enter') searchGroups()">
                             <button class="btn btn-primary" type="button" onclick="searchGroups()">Search</button>
                         </div>
                     </div>
