@@ -238,12 +238,17 @@ function updateAddRemoveTab() {
                 // Show all current members when no users are selected
                 nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
                 
-                // Ensure currentMembers is an array and handle the format
+                // Ensure currentMembers is an array
                 const membersArray = Array.isArray(currentMembers) ? currentMembers : [];
                 console.log("Current members:", membersArray); // Debug log
                 
+                if (membersArray.length === 0) {
+                    currentMembersList.innerHTML = '<p>No members in this group</p>';
+                    return;
+                }
+                
                 // Pagination logic
-                const itemsPerPage = 20; // 10 items per column * 2 columns
+                const itemsPerPage = 20;
                 const currentPage = parseInt(currentMembersList.dataset.currentPage || '1');
                 const totalPages = Math.ceil(membersArray.length / itemsPerPage);
                 const startIndex = (currentPage - 1) * itemsPerPage;
@@ -262,15 +267,15 @@ function updateAddRemoveTab() {
                             ${column1.map(memberId => `
                                 <div class="user-item mb-2">
                                     <span>${memberId}</span>
-                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove</button>
                                 </div>
                             `).join('')}
                         </div>
                         <div class="members-column">
                             ${column2.map(memberId => `
                                 <div class="user-item mb-2">
-                                    <span>${memberId.split(' (')[1].replace(')', '')} (${memberId.split(' (')[0]})</span>
-                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
+                                    <span>${memberId}</span>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove</button>
                                 </div>
                             `).join('')}
                         </div>
