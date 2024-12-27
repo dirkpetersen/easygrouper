@@ -234,22 +234,25 @@ function updateAddRemoveTab() {
                     </div>
                 `).join('') || '<p>No current members selected</p>';
             } else {
-                // Show all current members (up to 25) when no users are selected
+                // Show all current members when no users are selected
                 nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
+                
+                // Ensure currentMembers is an array
+                const membersArray = Array.isArray(currentMembers) ? currentMembers : [];
                 
                 // Pagination logic
                 const itemsPerPage = 20; // 10 items per column * 2 columns
                 const currentPage = parseInt(currentMembersList.dataset.currentPage || '1');
-                const totalPages = Math.ceil(currentMembers.length / itemsPerPage);
+                const totalPages = Math.ceil(membersArray.length / itemsPerPage);
                 const startIndex = (currentPage - 1) * itemsPerPage;
                 const endIndex = startIndex + itemsPerPage;
                 
                 // Get current page members
-                const displayMembers = currentMembers.slice(startIndex, endIndex);
+                const displayMembers = membersArray.slice(startIndex, endIndex);
                 
                 // Split into two columns
-                const column1 = displayMembers.slice(0, 10);
-                const column2 = displayMembers.slice(10);
+                const column1 = displayMembers.slice(0, Math.ceil(displayMembers.length / 2));
+                const column2 = displayMembers.slice(Math.ceil(displayMembers.length / 2));
                 
                 currentMembersList.innerHTML = `
                     <div class="members-grid">
