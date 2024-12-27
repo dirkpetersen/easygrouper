@@ -110,16 +110,12 @@
     margin-left: 1rem;
 }
 
-.members-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-.members-column {
+.members-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .pagination-controls {

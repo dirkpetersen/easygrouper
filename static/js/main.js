@@ -262,35 +262,18 @@ function updateAddRemoveTab() {
             // Get current page members
             const pageMembers = displayMembers.slice(startIndex, endIndex);
             
-            // Split into two columns
-            const column1 = pageMembers.slice(0, Math.ceil(pageMembers.length / 2));
-            const column2 = pageMembers.slice(Math.ceil(pageMembers.length / 2));
-            
             combinedMembersList.innerHTML = displayMembers.length === 0 ? 
                 '<p>No members to display</p>' : 
-                `<div class="members-grid">
-                    <div class="members-column">
-                        ${column1.map(user => `
-                            <div class="user-item mb-2">
-                                <span>${user.name}</span>
-                                ${user.isMember ? 
-                                    `<button class="btn btn-sm ${user.isSearched ? 'btn-danger' : 'btn-warning'}" onclick="removeMember('${user.id}')">Remove</button>` :
-                                    `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
-                                }
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="members-column">
-                        ${column2.map(user => `
-                            <div class="user-item mb-2">
-                                <span>${user.name}</span>
-                                ${user.isMember ? 
-                                    `<button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>` :
-                                    `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
-                                }
-                            </div>
-                        `).join('')}
-                    </div>
+                `<div class="members-list">
+                    ${pageMembers.map(user => `
+                        <div class="user-item mb-2">
+                            <span>${user.name}</span>
+                            ${user.isMember ? 
+                                `<button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>` :
+                                `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
+                            }
+                        </div>
+                    `).join('')}
                 </div>
                 ${totalPages > 1 ? `
                     <div class="pagination-controls mt-3">
