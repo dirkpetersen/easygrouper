@@ -274,7 +274,7 @@ function updateAddRemoveTab() {
                             <div class="user-item mb-2">
                                 <span>${user.name}</span>
                                 ${user.isMember ? 
-                                    `<button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>` :
+                                    `<button class="btn btn-sm ${user.isSearched ? 'btn-danger' : 'btn-warning'}" onclick="removeMember('${user.id}')">Remove</button>` :
                                     `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
                                 }
                             </div>
