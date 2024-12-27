@@ -63,7 +63,7 @@ function searchGroups() {
                         const remainingCount = group.members.length - 10;
                         memberDisplay = displayedMembers.join(', ');
                         if (remainingCount > 0) {
-                            memberDisplay += ` and ${remainingCount} more members`;
+                            memberDisplay += ` and ... ${remainingCount} more members`;
                         }
                     }
                     return `
@@ -161,10 +161,13 @@ function copyRecipients() {
 }
 
 function updateSelectedGroup() {
+    const section = document.getElementById('selectedGroupSection');
     const label = document.getElementById('selectedGroupLabel');
     if (selectedGroup) {
+        section.style.display = 'block';
         label.textContent = selectedGroup.name;
     } else {
+        section.style.display = 'none';
         label.textContent = 'None selected';
     }
 }
