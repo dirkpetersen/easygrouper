@@ -109,3 +109,21 @@
 .user-item button {
     margin-left: 1rem;
 }
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.members-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

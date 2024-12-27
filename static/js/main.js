@@ -232,22 +232,56 @@ function updateAddRemoveTab() {
                 // Show all current members (up to 25) when no users are selected
                 nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
                 
-                // Get first 25 members
-                const displayMembers = currentMembers.slice(0, 25);
-                currentMembersList.innerHTML = displayMembers.map(memberId => `
-                    <div class="user-item mb-2">
-                        <span>${memberId}</span>
-                        <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
-                    </div>
-                `).join('');
+                // Pagination logic
+                const itemsPerPage = 20; // 10 items per column * 2 columns
+                const currentPage = parseInt(currentMembersList.dataset.currentPage || '1');
+                const totalPages = Math.ceil(currentMembers.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
                 
-                if (currentMembers.length > 25) {
-                    currentMembersList.innerHTML += `
-                        <div class="alert alert-info mt-2">
-                            Showing 25 of ${currentMembers.length} members
+                // Get current page members
+                const displayMembers = currentMembers.slice(startIndex, endIndex);
+                
+                // Split into two columns
+                const column1 = displayMembers.slice(0, 10);
+                const column2 = displayMembers.slice(10);
+                
+                currentMembersList.innerHTML = `
+                    <div class="members-grid">
+                        <div class="members-column">
+                            ${column1.map(memberId => `
+                                <div class="user-item mb-2">
+                                    <span>${memberId}</span>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
+                                </div>
+                            `).join('')}
                         </div>
-                    `;
-                }
+                        <div class="members-column">
+                            ${column2.map(memberId => `
+                                <div class="user-item mb-2">
+                                    <span>${memberId}</span>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ${totalPages > 1 ? `
+                        <div class="pagination-controls mt-3">
+                            <button class="btn btn-secondary" 
+                                    onclick="changeMembersPage(${currentPage - 1})"
+                                    ${currentPage === 1 ? 'disabled' : ''}>
+                                Previous
+                            </button>
+                            <span class="mx-3">Page ${currentPage} of ${totalPages}</span>
+                            <button class="btn btn-secondary" 
+                                    onclick="changeMembersPage(${currentPage + 1})"
+                                    ${currentPage === totalPages ? 'disabled' : ''}>
+                                Next
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                currentMembersList.dataset.currentPage = currentPage;
             }
         });
 }
@@ -273,6 +307,12 @@ function addMember(userId) {
         alert('Error adding member');
         console.error('Error:', error);
     });
+}
+
+function changeMembersPage(newPage) {
+    const currentMembersList = document.getElementById('currentMembersList');
+    currentMembersList.dataset.currentPage = newPage;
+    updateAddRemoveTab();
 }
 
 function removeMember(userId) {
