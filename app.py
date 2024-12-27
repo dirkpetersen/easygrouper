@@ -369,9 +369,9 @@ if __name__ == '__main__':
     if ssl_cert and ssl_key:
         if os.path.exists(os.path.expanduser(ssl_cert)) and os.path.exists(os.path.expanduser(ssl_key)):
             ssl_context = (os.path.expanduser(ssl_cert), os.path.expanduser(ssl_key))
-            print(f"Starting server with SSL using cert: {ssl_cert} and key: {ssl_key}")
+            print(f" * Starting with SSL using cert: {ssl_cert}")
         else:
-            print("Warning: SSL certificate files specified but not found - starting without SSL")
+            print(" * Warning: SSL certificate files specified but not found - starting without SSL")
             if not os.path.exists(ssl_cert):
                 print(f"Missing certificate file: {ssl_cert}")
             if not os.path.exists(ssl_key):
