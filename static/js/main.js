@@ -221,7 +221,7 @@ function updateAddRemoveTab() {
                 // Update non-members list
                 nonMembersList.innerHTML = nonMembers.map(user => `
                     <div class="user-item mb-2">
-                        <span>${user.name}</span>
+                        <span>${user.name} (${user.id})</span>
                         <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add to Group</button>
                     </div>
                 `).join('') || '<p>No non-members selected</p>';
@@ -256,7 +256,7 @@ function updateAddRemoveTab() {
                         <div class="members-column">
                             ${column1.map(memberId => `
                                 <div class="user-item mb-2">
-                                    <span>${memberId}</span>
+                                    <span>${memberId.split(' (')[0]} (${memberId})</span>
                                     <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
                                 </div>
                             `).join('')}
