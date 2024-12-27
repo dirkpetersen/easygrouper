@@ -54,13 +54,26 @@ function searchGroups() {
             if (groups.length === 0) {
                 resultsDiv.innerHTML = '<div class="alert alert-info">No groups found</div>';
             } else {
-                resultsDiv.innerHTML = groups.map(group => `
-                <div class="group-card ${selectedGroup?.id === group.id ? 'selected' : ''}"
-                     onclick="selectGroup('${group.id}', '${group.name}')">
-                    <h5>${group.name}</h5>
-                    <p>Members: ${group.members.join(', ') || 'None'}</p>
-                </div>
-            `).join('');
+                resultsDiv.innerHTML = groups.map(group => {
+                    let memberDisplay;
+                    if (group.members.length === 0) {
+                        memberDisplay = 'None';
+                    } else {
+                        const displayedMembers = group.members.slice(0, 10);
+                        const remainingCount = group.members.length - 10;
+                        memberDisplay = displayedMembers.join(', ');
+                        if (remainingCount > 0) {
+                            memberDisplay += ` and ${remainingCount} more members`;
+                        }
+                    }
+                    return `
+                        <div class="group-card ${selectedGroup?.id === group.id ? 'selected' : ''}"
+                             onclick="selectGroup('${group.id}', '${group.name}')">
+                            <h5>${group.name}</h5>
+                            <p>Members: ${memberDisplay}</p>
+                        </div>
+                    `;
+                }).join('');
             }
             spinner.style.display = 'none';
             results.style.display = 'grid';
@@ -148,16 +161,11 @@ function copyRecipients() {
 }
 
 function updateSelectedGroup() {
-    const container = document.getElementById('selectedGroup');
+    const label = document.getElementById('selectedGroupLabel');
     if (selectedGroup) {
-        container.innerHTML = `
-            <span class="selected-item">
-                ${selectedGroup.name}
-                <span class="remove-btn" onclick="selectGroup(null)">×</span>
-            </span>
-        `;
+        label.textContent = selectedGroup.name;
     } else {
-        container.innerHTML = '';
+        label.textContent = 'None selected';
     }
 }
 
