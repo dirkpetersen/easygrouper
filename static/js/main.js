@@ -51,9 +51,12 @@ function searchGroups() {
         .then(response => response.json())
         .then(groups => {
             const resultsDiv = document.getElementById('groupSearchResults');
+            const selectedGroupSection = document.getElementById('selectedGroupSection');
             if (groups.length === 0) {
                 resultsDiv.innerHTML = '<div class="alert alert-info">No groups found</div>';
+                selectedGroupSection.style.display = 'none';
             } else {
+                selectedGroupSection.style.display = 'block';
                 resultsDiv.innerHTML = groups.map(group => {
                     let memberDisplay;
                     if (group.members.length === 0) {
@@ -161,14 +164,11 @@ function copyRecipients() {
 }
 
 function updateSelectedGroup() {
-    const section = document.getElementById('selectedGroupSection');
     const label = document.getElementById('selectedGroupLabel');
     if (selectedGroup) {
-        section.style.display = 'block';
         label.textContent = selectedGroup.name;
     } else {
-        section.style.display = 'none';
-        label.textContent = 'None selected';
+        label.textContent = 'Please click on a card to select';
     }
 }
 
