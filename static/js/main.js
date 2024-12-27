@@ -251,7 +251,6 @@ function updateAddRemoveTab() {
             }
         });
 }
-}
 
 function addMember(userId) {
     if (!selectedGroup) return;
