@@ -362,13 +362,13 @@ def submit_changes():
         }), 500
 
 if __name__ == '__main__':
-    ssl_cert = os.path.expanduser(os.getenv('SSL_CERT'))
-    ssl_key = os.path.expanduser(os.getenv('SSL_KEY'))
+    ssl_cert = os.getenv('SSL_CERT')
+    ssl_key = os.getenv('SSL_KEY')
     
     ssl_context = None
     if ssl_cert and ssl_key:
-        if os.path.exists(ssl_cert) and os.path.exists(ssl_key):
-            ssl_context = (ssl_cert, ssl_key)
+        if os.path.exists(os.path.expanduser(ssl_cert)) and os.path.exists(os.path.expanduser(ssl_key)):
+            ssl_context = (os.path.expanduser(ssl_cert), os.path.expanduser(ssl_key))
             print(f"Starting server with SSL using cert: {ssl_cert} and key: {ssl_key}")
         else:
             print("Warning: SSL certificate files specified but not found - starting without SSL")
