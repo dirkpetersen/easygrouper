@@ -362,8 +362,8 @@ def submit_changes():
         }), 500
 
 if __name__ == '__main__':
-    ssl_cert = os.getenv('SSL_CERT')
-    ssl_key = os.getenv('SSL_KEY')
+    ssl_cert = os.path.expanduser(os.getenv('SSL_CERT'))
+    ssl_key = os.path.expanduser(os.getenv('SSL_KEY'))
     
     ssl_context = None
     if ssl_cert and ssl_key:
