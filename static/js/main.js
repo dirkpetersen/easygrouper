@@ -240,7 +240,7 @@ function updateAddRemoveTab() {
                 addAllSection.style.display = hasNonMembers ? 'flex' : 'none';
                 if (hasNonMembers) {
                     const addAllButton = document.getElementById('addAllButton');
-                    addAllButton.textContent = `Add identities below to ${selectedGroup.name}`;
+                    addAllButton.textContent = `Add all to ${selectedGroup.name}`;
                 }
             } else {
                 // Show all current members when no users are selected
