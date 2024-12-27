@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
-def dprint(**args):
+def dprint(*args, **kwargs):
     if debug_mode:
-        print(**args)
+        print(*args, **kwargs)
 
 def extract_quoted_terms(query):
     """Extract terms enclosed in quotes and return both quoted and unquoted terms"""
