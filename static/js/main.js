@@ -252,19 +252,24 @@ function updateAddRemoveTab() {
                 addAllSection.style.display = 'none';
             }
 
+            // Split all members into add and remove arrays first
+            const allAddMembers = displayMembers.filter(user => !user.isMember);
+            const allRemoveMembers = displayMembers.filter(user => user.isMember);
+
             // Pagination logic
             const itemsPerPage = 20;
             const currentPage = parseInt(combinedMembersList.dataset.currentPage || '1');
-            const totalPages = Math.ceil(displayMembers.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
             
-            // Get current page members
-            const pageMembers = displayMembers.slice(startIndex, endIndex);
+            // Calculate pagination for each column independently
+            const addStartIndex = (currentPage - 1) * itemsPerPage;
+            const removeStartIndex = (currentPage - 1) * itemsPerPage;
             
-            // Split members into add and remove columns
-            const addMembers = pageMembers.filter(user => !user.isMember);
-            const removeMembers = pageMembers.filter(user => user.isMember);
+            // Get current page members for each column
+            const addMembers = allAddMembers.slice(addStartIndex, addStartIndex + itemsPerPage);
+            const removeMembers = allRemoveMembers.slice(removeStartIndex, removeStartIndex + itemsPerPage);
+            
+            // Calculate total pages based on the larger of the two arrays
+            const totalPages = Math.ceil(Math.max(allAddMembers.length, allRemoveMembers.length) / itemsPerPage);
 
             combinedMembersList.innerHTML = displayMembers.length === 0 ? 
                 '<p>No members to display</p>' : 
