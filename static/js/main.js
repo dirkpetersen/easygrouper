@@ -223,9 +223,9 @@ function updateAddRemoveTab() {
 
                 displayMembers = allSelectedUsers;
                 
-                // Show Add All button only if there are non-members
+                // Show Add All section only if there are non-members
                 const hasNonMembers = displayMembers.some(user => !user.isMember);
-                addAllSection.style.display = hasNonMembers ? 'block' : 'none';
+                addAllSection.style.display = hasNonMembers ? 'flex' : 'none';
             } else {
                 // Show all current members when no users are selected
                 displayMembers = currentMembers.map(id => ({
