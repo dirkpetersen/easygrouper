@@ -114,8 +114,8 @@ function toggleUser(id) {
         selectedUsers.add(id);
     }
     updateSelectedUsers();
-    // Update the clicked card's selected state
-    const selectedCard = document.querySelector(`.user-card[onclick*="${id}"]`);
+    // Update the clicked card's selected state using a more precise selector
+    const selectedCard = document.querySelector(`.user-card[onclick="toggleUser('${id}')"]`);
     if (selectedCard) {
         selectedCard.classList.toggle('selected');
     }
