@@ -187,19 +187,6 @@ function updateAddRemoveTab() {
     addremoveMessage.style.display = 'none';
     memberManagement.style.display = 'block';
 
-    if (selectedUsers.size > 0) {
-        // Get all selected users
-        const allSelectedUsers = Array.from(selectedUsers).map(id => {
-            const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
-            if (userCard) {
-                return {
-                    id: id,
-                    name: userCard.querySelector('strong').textContent
-                };
-            }
-            return null;
-        }).filter(user => user);
-
     // Get current group members
     fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
         .then(response => response.json())
@@ -210,6 +197,18 @@ function updateAddRemoveTab() {
             const currentMembers = group.members;
             
             if (selectedUsers.size > 0) {
+                // Get all selected users
+                const allSelectedUsers = Array.from(selectedUsers).map(id => {
+                    const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
+                    if (userCard) {
+                        return {
+                            id: id,
+                            name: userCard.querySelector('strong').textContent
+                        };
+                    }
+                    return null;
+                }).filter(user => user);
+
                 // Split users into members and non-members
                 const members = allSelectedUsers.filter(user => currentMembers.includes(user.id));
                 const nonMembers = allSelectedUsers.filter(user => !currentMembers.includes(user.id));
