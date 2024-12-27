@@ -7,6 +7,12 @@ function searchUsers() {
     const spinner = document.getElementById('userSpinner');
     const results = document.getElementById('userSearchResults');
     
+    if (query.trim().length < 3) {
+        results.innerHTML = '<div class="alert alert-warning">Please enter at least 3 characters to search</div>';
+        results.style.display = 'block';
+        return;
+    }
+    
     spinner.style.display = 'block';
     results.style.display = 'none';
     
@@ -50,6 +56,12 @@ function searchGroups() {
     const query = document.getElementById('groupSearchInput').value;
     const spinner = document.getElementById('groupSpinner');
     const results = document.getElementById('groupSearchResults');
+    
+    if (query.trim().length < 3) {
+        results.innerHTML = '<div class="alert alert-warning">Please enter at least 3 characters to search</div>';
+        results.style.display = 'block';
+        return;
+    }
     
     spinner.style.display = 'block';
     results.style.display = 'none';
