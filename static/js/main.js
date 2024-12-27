@@ -193,6 +193,7 @@ function updateAddRemoveTab() {
     memberManagement.style.display = 'block';
 
     // Get current group members
+    console.log("Selected group:", selectedGroup); // Debug log
     fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
         .then(response => response.json())
         .then(groups => {
@@ -237,8 +238,9 @@ function updateAddRemoveTab() {
                 // Show all current members when no users are selected
                 nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
                 
-                // Ensure currentMembers is an array
+                // Ensure currentMembers is an array and handle the format
                 const membersArray = Array.isArray(currentMembers) ? currentMembers : [];
+                console.log("Current members:", membersArray); // Debug log
                 
                 // Pagination logic
                 const itemsPerPage = 20; // 10 items per column * 2 columns
@@ -259,7 +261,7 @@ function updateAddRemoveTab() {
                         <div class="members-column">
                             ${column1.map(memberId => `
                                 <div class="user-item mb-2">
-                                    <span>${memberId.split(' (')[1].replace(')', '')} (${memberId.split(' (')[0]})</span>
+                                    <span>${memberId}</span>
                                     <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
                                 </div>
                             `).join('')}
