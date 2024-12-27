@@ -248,16 +248,16 @@ def search_groups():
         field_filters = []
         
         # If word was in quotes, use exact match (no wildcards)
-        if word.startswith('"') and word.endswith('"'):
+        if (word.startswith('"') and word.endswith('"')) or (word.startswith("'") and word.endswith("'")):
             word = word[1:-1]  # Remove quotes
             field_filters.extend([
                 f"(cn={word})",
-                f"(description={word})"
+               # f"(description={word})"   # description must be in schema or this does not work 
             ])
         else:
             field_filters.extend([
                 f"(cn=*{word}*)",
-                f"(description=*{word}*)"
+              #  f"(description=*{word}*)"  # description must be in schema or this does not work 
             ])
         
         # Add gidNumber search if word is numeric
@@ -270,6 +270,8 @@ def search_groups():
     
     # Combine with AND to require all words and support both group types
     ldap_filter = f"(&(|(objectClass=posixGroup)(objectClass=group)){''.join(word_filters)})"
+    print('LDAP Filter:', ldap_filter)
+    #ldap_filter = '(|(objectClass=posixGroup)(objectClass=group))'
     
     with get_ldap_connection() as conn:
         conn.search(
@@ -278,6 +280,8 @@ def search_groups():
             SUBTREE,
             attributes=['cn', 'gidNumber', 'memberUid', 'member', 'description']
         )
+
+        print('Entries:', conn.entries)
         
         results = []
         for entry in conn.entries:
