@@ -256,7 +256,7 @@ function updateAddRemoveTab() {
                         <div class="members-column">
                             ${column1.map(memberId => `
                                 <div class="user-item mb-2">
-                                    <span>${memberId.split(' (')[0]} (${memberId})</span>
+                                    <span>${memberId.split(' (')[0]} (${memberId.split(' (')[0]})</span>
                                     <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
                                 </div>
                             `).join('')}
