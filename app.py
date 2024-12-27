@@ -6,7 +6,11 @@ from datetime import datetime
 from ldap3 import Server, Connection, SUBTREE, Tls
 from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
+
 debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+app = Flask(__name__)
 
 def dprint(*args, **kwargs):
     if debug_mode:
@@ -40,11 +44,6 @@ def parse_ldap_mappings():
 
 # Load LDAP attribute mappings
 LDAP_ATTR_MAP = parse_ldap_mappings()
-
-# Load environment variables
-load_dotenv()
-
-app = Flask(__name__)
 
 def get_ldap_connection():
     ldap_url = os.getenv('LDAP_URL', 'ldap://localhost:389')
