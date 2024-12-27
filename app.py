@@ -6,6 +6,12 @@ from datetime import datetime
 from ldap3 import Server, Connection, SUBTREE, Tls
 from dotenv import load_dotenv
 
+debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+
+def dprint(**args):
+    if debug_mode:
+        print(**args)
+
 def extract_quoted_terms(query):
     """Extract terms enclosed in quotes and return both quoted and unquoted terms"""
     quoted_terms = []
@@ -120,7 +126,7 @@ def search_users():
     
     # Extract quoted terms from the original query
     quoted_terms, unquoted_terms = extract_quoted_terms(query)
-    print(quoted_terms, unquoted_terms)    
+    dprint(quoted_terms, unquoted_terms)
     
     # get all search words 
     words = quoted_terms + unquoted_terms
@@ -154,7 +160,7 @@ def search_users():
     else:
         ldap_filter = '(&(objectClass=person)(!(objectClass=*)))'  # Return empty result
 
-    print("LDAP Filter:", ldap_filter)
+    dprint("LDAP Filter:", ldap_filter)
     
     with get_ldap_connection() as conn:
         # Get all mapped LDAP attributes for the search
@@ -201,7 +207,7 @@ def search_users():
                     value_lower = value.lower()
                     # Look for the term surrounded by non-alphanumeric characters or string boundaries
                     if re.search(pattern, value_lower):
-                        print('match', pattern, value_lower)
+                        dprint('match', pattern, value_lower)
                         found_match = True
                         break
                 if not found_match:
@@ -270,7 +276,7 @@ def search_groups():
     
     # Combine with AND to require all words and support both group types
     ldap_filter = f"(&(|(objectClass=posixGroup)(objectClass=group)){''.join(word_filters)})"
-    print('LDAP Filter:', ldap_filter)
+    dprint('LDAP Filter:', ldap_filter)
     #ldap_filter = '(|(objectClass=posixGroup)(objectClass=group))'
     
     with get_ldap_connection() as conn:
@@ -281,7 +287,7 @@ def search_groups():
             attributes=['cn', 'gidNumber', 'memberUid', 'member', 'description']
         )
 
-        print('Entries:', conn.entries)
+        dprint('Entries:', conn.entries)
         
         results = []
         for entry in conn.entries:
@@ -377,10 +383,9 @@ if __name__ == '__main__':
             if not os.path.exists(os.path.expanduser(ssl_key)):
                 print(f"     Missing key file: {ssl_key}")
     
-    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(
         host='0.0.0.0',
-        port=5555,
+        port=int(os.getenv('FLASK_PORT', 5555)),
         debug=debug_mode,
         ssl_context=ssl_context
     )
