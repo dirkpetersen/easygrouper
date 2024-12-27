@@ -66,7 +66,7 @@ function searchGroups() {
                         const remainingCount = group.members.length - 10;
                         memberDisplay = displayedMembers.join(', ');
                         if (remainingCount > 0) {
-                            memberDisplay += ` and ... ${remainingCount} more members`;
+                            memberDisplay += ` ... and ${remainingCount} more members`;
                         }
                     }
                     return `
