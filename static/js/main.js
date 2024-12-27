@@ -180,8 +180,8 @@ function updateSelectedGroup() {
 function updateAddRemoveTab() {
     const addremoveMessage = document.getElementById('addremoveMessage');
     const memberManagement = document.getElementById('memberManagement');
-    const nonMembersList = document.getElementById('nonMembersList');
-    const currentMembersList = document.getElementById('currentMembersList');
+    const combinedMembersList = document.getElementById('combinedMembersList');
+    const addAllSection = document.getElementById('addAllSection');
 
     if (!selectedGroup) {
         addremoveMessage.style.display = 'block';
@@ -192,112 +192,107 @@ function updateAddRemoveTab() {
     addremoveMessage.style.display = 'none';
     memberManagement.style.display = 'block';
 
-    // Get current group members
-    console.log("Selected group:", selectedGroup); // Debug log
     fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
         .then(response => response.json())
         .then(groups => {
             const group = groups.find(g => g.id === selectedGroup.id);
             if (!group) return;
 
-            const currentMembers = group.members;
-            
+            const currentMembers = group.members || [];
+            let displayMembers = [];
+
             if (selectedUsers.size > 0) {
-                // Get all selected users from our stored Map
-                const allSelectedUsers = Array.from(selectedUsers).map(id => {
-                    const user = allSearchedUsers.get(id);
-                    if (user) {
-                        return {
-                            id: id,
-                            name: `${user.name || ''} (${user.id || ''})`
-                        };
-                    }
-                    return null;
-                }).filter(user => user);
+                // Get all selected users and sort them (non-members first, then members)
+                const allSelectedUsers = Array.from(selectedUsers)
+                    .map(id => {
+                        const user = allSearchedUsers.get(id);
+                        if (user) {
+                            return {
+                                id: id,
+                                name: `${user.name || ''} (${user.id || ''})`,
+                                isMember: currentMembers.includes(id)
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(user => user)
+                    .sort((a, b) => {
+                        if (a.isMember === b.isMember) return 0;
+                        return a.isMember ? 1 : -1;
+                    });
 
-                // Split users into members and non-members
-                const members = allSelectedUsers.filter(user => currentMembers.includes(user.id));
-                const nonMembers = allSelectedUsers.filter(user => !currentMembers.includes(user.id));
-
-                // Update non-members list
-                nonMembersList.innerHTML = nonMembers.map(user => `
-                    <div class="user-item mb-2">
-                        <span>${user.name} (${user.id})</span>
-                        <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add to Group</button>
-                    </div>
-                `).join('') || '<p>No non-members selected</p>';
-
-                // Update current members list
-                currentMembersList.innerHTML = members.map(user => `
-                    <div class="user-item mb-2">
-                        <span>${user.name}</span>
-                        <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove from Group</button>
-                    </div>
-                `).join('') || '<p>No current members selected</p>';
+                displayMembers = allSelectedUsers;
+                
+                // Show Add All button only if there are non-members
+                const hasNonMembers = displayMembers.some(user => !user.isMember);
+                addAllSection.style.display = hasNonMembers ? 'block' : 'none';
             } else {
                 // Show all current members when no users are selected
-                nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
-                
-                // Ensure currentMembers is an array
-                const membersArray = Array.isArray(currentMembers) ? currentMembers : [];
-                console.log("Current members:", membersArray); // Debug log
-                
-                if (membersArray.length === 0) {
-                    currentMembersList.innerHTML = '<p>No members in this group</p>';
-                    return;
-                }
-                
-                // Pagination logic
-                const itemsPerPage = 20;
-                const currentPage = parseInt(currentMembersList.dataset.currentPage || '1');
-                const totalPages = Math.ceil(membersArray.length / itemsPerPage);
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-                
-                // Get current page members
-                const displayMembers = membersArray.slice(startIndex, endIndex);
-                
-                // Split into two columns
-                const column1 = displayMembers.slice(0, Math.ceil(displayMembers.length / 2));
-                const column2 = displayMembers.slice(Math.ceil(displayMembers.length / 2));
-                
-                currentMembersList.innerHTML = `
-                    <div class="members-grid">
-                        <div class="members-column">
-                            ${column1.map(memberId => `
-                                <div class="user-item mb-2">
-                                    <span>${memberId}</span>
-                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="members-column">
-                            ${column2.map(memberId => `
-                                <div class="user-item mb-2">
-                                    <span>${memberId}</span>
-                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    ${totalPages > 1 ? `
-                        <div class="pagination-controls mt-3">
-                            <button class="btn btn-secondary" 
-                                    onclick="changeMembersPage(${currentPage - 1})"
-                                    ${currentPage === 1 ? 'disabled' : ''}>
-                                Previous
-                            </button>
-                            <span class="mx-3">Page ${currentPage} of ${totalPages}</span>
-                            <button class="btn btn-secondary" 
-                                    onclick="changeMembersPage(${currentPage + 1})"
-                                    ${currentPage === totalPages ? 'disabled' : ''}>
-                                Next
-                            </button>
-                        </div>
-                    ` : ''}
-                `;
-                currentMembersList.dataset.currentPage = currentPage;
+                displayMembers = currentMembers.map(id => ({
+                    id: id,
+                    name: id,
+                    isMember: true
+                }));
+                addAllSection.style.display = 'none';
             }
+
+            // Pagination logic
+            const itemsPerPage = 20;
+            const currentPage = parseInt(combinedMembersList.dataset.currentPage || '1');
+            const totalPages = Math.ceil(displayMembers.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            // Get current page members
+            const pageMembers = displayMembers.slice(startIndex, endIndex);
+            
+            // Split into two columns
+            const column1 = pageMembers.slice(0, Math.ceil(pageMembers.length / 2));
+            const column2 = pageMembers.slice(Math.ceil(pageMembers.length / 2));
+            
+            combinedMembersList.innerHTML = displayMembers.length === 0 ? 
+                '<p>No members to display</p>' : 
+                `<div class="members-grid">
+                    <div class="members-column">
+                        ${column1.map(user => `
+                            <div class="user-item mb-2">
+                                <span>${user.name}</span>
+                                ${user.isMember ? 
+                                    `<button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>` :
+                                    `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="members-column">
+                        ${column2.map(user => `
+                            <div class="user-item mb-2">
+                                <span>${user.name}</span>
+                                ${user.isMember ? 
+                                    `<button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>` :
+                                    `<button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ${totalPages > 1 ? `
+                    <div class="pagination-controls mt-3">
+                        <button class="btn btn-secondary" 
+                                onclick="changeMembersPage(${currentPage - 1})"
+                                ${currentPage === 1 ? 'disabled' : ''}>
+                            Previous
+                        </button>
+                        <span class="mx-3">Page ${currentPage} of ${totalPages}</span>
+                        <button class="btn btn-secondary" 
+                                onclick="changeMembersPage(${currentPage + 1})"
+                                ${currentPage === totalPages ? 'disabled' : ''}>
+                            Next
+                        </button>
+                    </div>
+                ` : ''}`;
+            
+            combinedMembersList.dataset.currentPage = currentPage;
         });
 }
 
@@ -324,9 +319,45 @@ function addMember(userId) {
     });
 }
 
+function addAllMembers() {
+    if (!selectedGroup) return;
+    
+    fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
+        .then(response => response.json())
+        .then(groups => {
+            const group = groups.find(g => g.id === selectedGroup.id);
+            if (!group) return;
+
+            const currentMembers = group.members || [];
+            const nonMembers = Array.from(selectedUsers)
+                .filter(id => !currentMembers.includes(id));
+
+            if (nonMembers.length === 0) return;
+
+            fetch('/api/submit-changes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    users: nonMembers,
+                    group: selectedGroup.id
+                })
+            })
+            .then(response => response.json())
+            .then(() => {
+                updateAddRemoveTab();
+            })
+            .catch(error => {
+                alert('Error adding members');
+                console.error('Error:', error);
+            });
+        });
+}
+
 function changeMembersPage(newPage) {
-    const currentMembersList = document.getElementById('currentMembersList');
-    currentMembersList.dataset.currentPage = newPage;
+    const combinedMembersList = document.getElementById('combinedMembersList');
+    combinedMembersList.dataset.currentPage = newPage;
     updateAddRemoveTab();
 }
 
