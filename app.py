@@ -372,10 +372,10 @@ if __name__ == '__main__':
             print(f" * Starting with SSL using cert: {ssl_cert}")
         else:
             print(" * Warning: SSL certificate files specified but not found - starting without SSL")
-            if not os.path.exists(ssl_cert):
-                print(f"Missing certificate file: {ssl_cert}")
-            if not os.path.exists(ssl_key):
-                print(f"Missing key file: {ssl_key}")
+            if not os.path.exists(os.path.expanduser(ssl_cert)):
+                print(f"     Missing certificate file: {ssl_cert}")
+            if not os.path.exists(os.path.expanduser(ssl_key)):
+                print(f"     Missing key file: {ssl_key}")
     
     app.run(
         host='0.0.0.0',
