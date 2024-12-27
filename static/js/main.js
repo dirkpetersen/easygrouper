@@ -105,6 +105,11 @@ function toggleUser(id) {
 function selectGroup(id, name) {
     selectedGroup = { id, name };
     updateSelectedGroup();
+    // Reset pagination when selecting a new group
+    const currentMembersList = document.getElementById('currentMembersList');
+    if (currentMembersList) {
+        currentMembersList.dataset.currentPage = '1';
+    }
     document.querySelectorAll('.group-card').forEach(card => {
         card.classList.remove('selected');
         if (card.onclick.toString().includes(`${id}`)) {
