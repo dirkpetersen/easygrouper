@@ -1,5 +1,6 @@
 let selectedUsers = new Set();
 let selectedGroup = null;
+let allSearchedUsers = new Map(); // Store all searched users with their details
 
 function searchUsers() {
     const query = document.getElementById('userSearchInput').value;
@@ -14,6 +15,12 @@ function searchUsers() {
         .then(users => {
             const resultsDiv = document.getElementById('userSearchResults');
             const selectedUsersSection = document.getElementById('selectedUsersSection');
+            
+            // Store all users in our Map
+            users.forEach(user => {
+                allSearchedUsers.set(user.id, user);
+            });
+            
             if (users.length === 0) {
                 resultsDiv.innerHTML = '<div class="alert alert-info">No users found</div>';
                 selectedUsersSection.style.display = 'none';
@@ -138,15 +145,8 @@ function updateRecipients() {
     if (!recipientsArea) return;
 
     const emails = Array.from(selectedUsers).map(id => {
-        const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
-        if (userCard) {
-            const emailElement = userCard.querySelector('p');
-            const emailText = emailElement.textContent.split('\n')[0];
-            // Extract just the email part before any parentheses
-            const email = emailText.split(' (')[0].trim();
-            return email;
-        }
-        return null;
+        const user = allSearchedUsers.get(id);
+        return user ? user.email : null;
     }).filter(email => email);
 
     recipientsArea.value = emails.join('; ');
@@ -203,13 +203,13 @@ function updateAddRemoveTab() {
             const currentMembers = group.members;
             
             if (selectedUsers.size > 0) {
-                // Get all selected users
+                // Get all selected users from our stored Map
                 const allSelectedUsers = Array.from(selectedUsers).map(id => {
-                    const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
-                    if (userCard) {
+                    const user = allSearchedUsers.get(id);
+                    if (user) {
                         return {
                             id: id,
-                            name: userCard.querySelector('strong').textContent
+                            name: `${user.name || ''} (${user.id || ''})`
                         };
                     }
                     return null;
