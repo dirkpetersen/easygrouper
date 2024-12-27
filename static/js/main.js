@@ -226,6 +226,10 @@ function updateAddRemoveTab() {
                 // Show Add All section only if there are non-members
                 const hasNonMembers = displayMembers.some(user => !user.isMember);
                 addAllSection.style.display = hasNonMembers ? 'flex' : 'none';
+                if (hasNonMembers) {
+                    const addAllButton = document.getElementById('addAllButton');
+                    addAllButton.textContent = `Add identities below to ${selectedGroup.name}`;
+                }
             } else {
                 // Show all current members when no users are selected
                 displayMembers = currentMembers.map(id => ({
