@@ -24,6 +24,9 @@
                     <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button">Search Group</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="addremove-tab" data-bs-toggle="tab" data-bs-target="#addremove" type="button">Add/Remove</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="recipients-tab" data-bs-toggle="tab" data-bs-target="#recipients" type="button">Recipients</button>
                 </li>
             </ul>
@@ -63,9 +66,24 @@
 
                     <div id="groupSpinner" class="spinner"></div>
                     <div id="groupSearchResults" class="search-results"></div>
+                </div>
 
-                    <div class="mt-4">
-                        <button class="btn btn-success" onclick="submitChanges()">Submit Changes</button>
+                <!-- Add/Remove Tab -->
+                <div class="tab-pane fade" id="addremove">
+                    <div class="mt-3" id="addremoveContent">
+                        <div class="alert alert-info" id="addremoveMessage">
+                            Please select users and a group first
+                        </div>
+                        <div id="memberManagement" style="display: none;">
+                            <div class="mb-4">
+                                <h5>Non-Members</h5>
+                                <div id="nonMembersList"></div>
+                            </div>
+                            <div class="mb-4">
+                                <h5>Current Members</h5>
+                                <div id="currentMembersList"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -172,38 +172,106 @@ function updateSelectedGroup() {
     }
 }
 
-function submitChanges() {
-    if (selectedUsers.size === 0 || !selectedGroup) {
-        alert('Please select both users and a group before submitting');
+function updateAddRemoveTab() {
+    const addremoveMessage = document.getElementById('addremoveMessage');
+    const memberManagement = document.getElementById('memberManagement');
+    const nonMembersList = document.getElementById('nonMembersList');
+    const currentMembersList = document.getElementById('currentMembersList');
+
+    if (!selectedGroup || selectedUsers.size === 0) {
+        addremoveMessage.style.display = 'block';
+        memberManagement.style.display = 'none';
         return;
     }
 
-    const changes = {
-        users: Array.from(selectedUsers),
-        group: selectedGroup.id
-    };
+    addremoveMessage.style.display = 'none';
+    memberManagement.style.display = 'block';
 
+    // Get all selected users
+    const allSelectedUsers = Array.from(selectedUsers).map(id => {
+        const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
+        if (userCard) {
+            return {
+                id: id,
+                name: userCard.querySelector('strong').textContent
+            };
+        }
+        return null;
+    }).filter(user => user);
+
+    // Get current group members
+    fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
+        .then(response => response.json())
+        .then(groups => {
+            const group = groups.find(g => g.id === selectedGroup.id);
+            if (!group) return;
+
+            const currentMembers = group.members;
+            
+            // Split users into members and non-members
+            const members = allSelectedUsers.filter(user => currentMembers.includes(user.id));
+            const nonMembers = allSelectedUsers.filter(user => !currentMembers.includes(user.id));
+
+            // Update non-members list
+            nonMembersList.innerHTML = nonMembers.map(user => `
+                <div class="user-item mb-2">
+                    <span>${user.name}</span>
+                    <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add to Group</button>
+                </div>
+            `).join('') || '<p>No non-members selected</p>';
+
+            // Update current members list
+            currentMembersList.innerHTML = members.map(user => `
+                <div class="user-item mb-2">
+                    <span>${user.name}</span>
+                    <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove from Group</button>
+                </div>
+            `).join('') || '<p>No current members selected</p>';
+        });
+}
+
+function addMember(userId) {
+    if (!selectedGroup) return;
+    
     fetch('/api/submit-changes', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(changes)
+        body: JSON.stringify({
+            users: [userId],
+            group: selectedGroup.id
+        })
     })
     .then(response => response.json())
-    .then(result => {
-        alert('Changes submitted successfully!');
-        // Clear selections
-        selectedUsers.clear();
-        selectedGroup = null;
-        updateSelectedUsers();
-        updateSelectedGroup();
-        // Reset search results
-        document.getElementById('userSearchResults').innerHTML = '';
-        document.getElementById('groupSearchResults').innerHTML = '';
+    .then(() => {
+        updateAddRemoveTab();
     })
     .catch(error => {
-        alert('Error submitting changes');
+        alert('Error adding member');
+        console.error('Error:', error);
+    });
+}
+
+function removeMember(userId) {
+    if (!selectedGroup) return;
+    
+    fetch('/api/submit-changes', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            users: [userId],
+            group: selectedGroup.id
+        })
+    })
+    .then(response => response.json())
+    .then(() => {
+        updateAddRemoveTab();
+    })
+    .catch(error => {
+        alert('Error removing member');
         console.error('Error:', error);
     });
 }
@@ -212,6 +280,11 @@ function submitChanges() {
 document.addEventListener('DOMContentLoaded', function() {
     var triggerTabList = [].slice.call(document.querySelectorAll('#mainTabs button'));
     triggerTabList.forEach(function(triggerEl) {
+        triggerEl.addEventListener('shown.bs.tab', function (event) {
+            if (event.target.id === 'addremove-tab') {
+                updateAddRemoveTab();
+            }
+        });
         new bootstrap.Tab(triggerEl);
     });
 });
