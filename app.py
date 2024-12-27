@@ -377,9 +377,10 @@ if __name__ == '__main__':
             if not os.path.exists(os.path.expanduser(ssl_key)):
                 print(f"     Missing key file: {ssl_key}")
     
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(
         host='0.0.0.0',
         port=5555,
-        debug=True,
+        debug=debug_mode,
         ssl_context=ssl_context
     )
