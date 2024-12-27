@@ -178,7 +178,7 @@ function updateAddRemoveTab() {
     const nonMembersList = document.getElementById('nonMembersList');
     const currentMembersList = document.getElementById('currentMembersList');
 
-    if (!selectedGroup || selectedUsers.size === 0) {
+    if (!selectedGroup) {
         addremoveMessage.style.display = 'block';
         memberManagement.style.display = 'none';
         return;
@@ -187,17 +187,18 @@ function updateAddRemoveTab() {
     addremoveMessage.style.display = 'none';
     memberManagement.style.display = 'block';
 
-    // Get all selected users
-    const allSelectedUsers = Array.from(selectedUsers).map(id => {
-        const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
-        if (userCard) {
-            return {
-                id: id,
-                name: userCard.querySelector('strong').textContent
-            };
-        }
-        return null;
-    }).filter(user => user);
+    if (selectedUsers.size > 0) {
+        // Get all selected users
+        const allSelectedUsers = Array.from(selectedUsers).map(id => {
+            const userCard = document.querySelector(`.user-card[onclick*="${id}"]`);
+            if (userCard) {
+                return {
+                    id: id,
+                    name: userCard.querySelector('strong').textContent
+                };
+            }
+            return null;
+        }).filter(user => user);
 
     // Get current group members
     fetch(`/api/groups/search?q=${encodeURIComponent(selectedGroup.id)}`)
@@ -208,25 +209,47 @@ function updateAddRemoveTab() {
 
             const currentMembers = group.members;
             
-            // Split users into members and non-members
-            const members = allSelectedUsers.filter(user => currentMembers.includes(user.id));
-            const nonMembers = allSelectedUsers.filter(user => !currentMembers.includes(user.id));
+            if (selectedUsers.size > 0) {
+                // Split users into members and non-members
+                const members = allSelectedUsers.filter(user => currentMembers.includes(user.id));
+                const nonMembers = allSelectedUsers.filter(user => !currentMembers.includes(user.id));
 
-            // Update non-members list
-            nonMembersList.innerHTML = nonMembers.map(user => `
-                <div class="user-item mb-2">
-                    <span>${user.name}</span>
-                    <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add to Group</button>
-                </div>
-            `).join('') || '<p>No non-members selected</p>';
+                // Update non-members list
+                nonMembersList.innerHTML = nonMembers.map(user => `
+                    <div class="user-item mb-2">
+                        <span>${user.name}</span>
+                        <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add to Group</button>
+                    </div>
+                `).join('') || '<p>No non-members selected</p>';
 
-            // Update current members list
-            currentMembersList.innerHTML = members.map(user => `
-                <div class="user-item mb-2">
-                    <span>${user.name}</span>
-                    <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove from Group</button>
-                </div>
-            `).join('') || '<p>No current members selected</p>';
+                // Update current members list
+                currentMembersList.innerHTML = members.map(user => `
+                    <div class="user-item mb-2">
+                        <span>${user.name}</span>
+                        <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove from Group</button>
+                    </div>
+                `).join('') || '<p>No current members selected</p>';
+            } else {
+                // Show all current members (up to 25) when no users are selected
+                nonMembersList.innerHTML = '<p>Select users to add them to the group</p>';
+                
+                // Get first 25 members
+                const displayMembers = currentMembers.slice(0, 25);
+                currentMembersList.innerHTML = displayMembers.map(memberId => `
+                    <div class="user-item mb-2">
+                        <span>${memberId}</span>
+                        <button class="btn btn-sm btn-danger" onclick="removeMember('${memberId}')">Remove from Group</button>
+                    </div>
+                `).join('');
+                
+                if (currentMembers.length > 25) {
+                    currentMembersList.innerHTML += `
+                        <div class="alert alert-info mt-2">
+                            Showing 25 of ${currentMembers.length} members
+                        </div>
+                    `;
+                }
+            }
         });
 }
 
