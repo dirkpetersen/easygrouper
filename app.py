@@ -44,6 +44,7 @@ def get_ldap_connection():
     ldap_url = os.getenv('LDAP_URL', 'ldap://localhost:389')
     bind_dn = os.getenv('LDAP_BIND_DN')
     password = os.getenv('LDAP_PASSWORD')
+    #print(ldap_url,bind_dn,password)
 
     if not bind_dn:
         raise ValueError("LDAP_BIND_DN environment variable must be set")
