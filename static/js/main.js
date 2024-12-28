@@ -249,36 +249,66 @@ function updateAddRemoveTab() {
                 addAllSection.style.display = 'none';
             }
 
-            // Get non-member users for adding
-            const allAddMembers = displayMembers.filter(user => !user.isMember);
+            // Split users into categories
+            const selectedNonMembers = displayMembers.filter(user => !user.isMember && selectedUsers.has(user.id));
+            const selectedMembers = displayMembers.filter(user => user.isMember && selectedUsers.has(user.id));
+            const nonSelectedMembers = currentMembers
+                .filter(id => !selectedUsers.has(id))
+                .map(id => ({
+                    id: id,
+                    name: id,
+                    isMember: true
+                }));
 
             // Pagination logic
             const itemsPerPage = 20;
             const currentPage = parseInt(combinedMembersList.dataset.currentPage || '1');
-            
-            // Calculate pagination
-            const addStartIndex = (currentPage - 1) * itemsPerPage;
-            
-            // Get current page members
-            const addMembers = allAddMembers.slice(addStartIndex, addStartIndex + itemsPerPage);
-            
-            // Calculate total pages
-            const totalPages = Math.ceil(allAddMembers.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const totalItems = selectedNonMembers.length + selectedMembers.length + nonSelectedMembers.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-            combinedMembersList.innerHTML = displayMembers.length === 0 ? 
-                '<p>No members to display</p>' : 
-                `<div class="members-grid">
-                    ${addMembers.length > 0 ? `
+            // Get current page items for each category
+            const getCurrentPageItems = (items) => {
+                return items.slice(startIndex, startIndex + itemsPerPage);
+            };
+
+            combinedMembersList.innerHTML = `
+                <div class="members-grid">
+                    ${selectedNonMembers.length > 0 ? `
                         <div class="members-column">
                             <h5 class="text-success mb-3">Users to Add</h5>
-                            ${addMembers.map(user => `
+                            ${getCurrentPageItems(selectedNonMembers).map(user => `
                                 <div class="user-item mb-2">
                                     <span>${user.name}</span>
                                     <button class="btn btn-sm btn-success" onclick="addMember('${user.id}')">Add</button>
                                 </div>
                             `).join('')}
                         </div>
-                    ` : '<p>No users to add</p>'}
+                    ` : ''}
+                    
+                    ${selectedMembers.length > 0 ? `
+                        <div class="members-column">
+                            <h5 class="text-danger mb-3">Selected Members</h5>
+                            ${getCurrentPageItems(selectedMembers).map(user => `
+                                <div class="user-item mb-2">
+                                    <span>${user.name}</span>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${nonSelectedMembers.length > 0 ? `
+                        <div class="members-column">
+                            <h5 class="text-warning mb-3">Current Members</h5>
+                            ${getCurrentPageItems(nonSelectedMembers).map(user => `
+                                <div class="user-item mb-2">
+                                    <span>${user.name}</span>
+                                    <button class="btn btn-sm btn-warning" onclick="removeMember('${user.id}')">Remove</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                 </div>
                 ${totalPages > 1 ? `
                     <div class="pagination-controls mt-3">
@@ -298,6 +328,29 @@ function updateAddRemoveTab() {
             
             combinedMembersList.dataset.currentPage = currentPage;
         });
+}
+
+function removeMember(userId) {
+    if (!selectedGroup) return;
+    
+    fetch('/api/submit-changes', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            users: [userId],
+            group: selectedGroup.id
+        })
+    })
+    .then(response => response.json())
+    .then(() => {
+        updateAddRemoveTab();
+    })
+    .catch(error => {
+        alert('Error removing member');
+        console.error('Error:', error);
+    });
 }
 
 function addMember(userId) {

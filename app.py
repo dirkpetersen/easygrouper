@@ -329,7 +329,7 @@ def search_groups():
             
     return jsonify(results)
 
-@app.route('/api/submit-changes', methods=['POST'])  # Removed DELETE method since we no longer handle removals
+@app.route('/api/submit-changes', methods=['POST', 'DELETE'])
 def submit_changes():
     data = request.json
     group_id = data.get('group')
@@ -360,10 +360,12 @@ def submit_changes():
                 
             group_dn = conn.entries[0].entry_dn
             
-            # Add users to group
+            # Add or remove users based on request method
+            operation = 2 if request.method == 'POST' else 1  # 2 = MODIFY_ADD, 1 = MODIFY_DELETE
+            
             for user_id in user_ids:
                 user_dn = f"uid={user_id},{os.getenv('LDAP_BASE_DN_USER')}"
-                conn.modify(group_dn, {'memberUid': [(2, [user_id])]})  # 2 = MODIFY_ADD
+                conn.modify(group_dn, {'memberUid': [(operation, [user_id])]})
                 
         return jsonify({
             "status": "success",
