@@ -39,6 +39,9 @@ def parse_ldap_mappings():
     mappings = {}
     for pair in mapping_str.split():
         app_attr, ldap_attr = pair.split(':')
+        if app_attr == 'id' and ':uid' not in mapping_str:
+            # If id:uid is not in mappings, store the alternative ID attribute
+            mappings['alt_id'] = ldap_attr
         mappings[app_attr] = ldap_attr
     return mappings
 
@@ -293,16 +296,27 @@ def search_groups():
             if hasattr(entry, 'memberUid') and entry.memberUid.values:  # OpenLDAP style
                 members = entry.memberUid.values
             elif hasattr(entry, 'member') and entry.member.values:   # AD style
-                # Extract CN from each member DN
+                # Extract ID from each member DN based on available attribute
+                alt_id_attr = LDAP_ATTR_MAP.get('alt_id')
                 for member_dn in entry.member.values:
                     try:
-                        # Split DN into components and find the CN
+                        # First try to find uid in DN
                         dn_parts = [x.strip() for x in member_dn.split(',')]
-                        cn_part = next((x for x in dn_parts if x.upper().startswith('CN=')), None)
-                        if cn_part:
-                            # Extract the CN value after 'CN='
-                            cn = cn_part.split('=', 1)[1]
-                            members.append(cn)
+                        uid_part = next((x for x in dn_parts if x.upper().startswith('UID=')), None)
+                        if uid_part:
+                            uid = uid_part.split('=', 1)[1]
+                            members.append(uid)
+                        # If no uid, try alternative ID attribute (e.g., sAMAccountName)
+                        elif alt_id_attr:
+                            with get_ldap_connection() as conn:
+                                conn.search(
+                                    member_dn,  # Search this specific DN
+                                    '(objectClass=*)',
+                                    attributes=[alt_id_attr]
+                                )
+                                if conn.entries and hasattr(conn.entries[0], alt_id_attr):
+                                    alt_id = getattr(conn.entries[0], alt_id_attr).value
+                                    members.append(alt_id)
                     except Exception as e:
                         print(f"Error parsing member DN {member_dn}: {e}")
             
