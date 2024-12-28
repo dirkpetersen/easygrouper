@@ -92,6 +92,7 @@ function searchGroups() {
                         <div class="group-card ${selectedGroup?.id === group.id ? 'selected' : ''}"
                              onclick="selectGroup('${group.id}', '${group.name}')">
                             <h5>${group.name}</h5>
+                            ${group.description ? `<p class="text-muted">${group.description}</p>` : ''}
                             <p>Members: ${memberDisplay}</p>
                         </div>
                     `;

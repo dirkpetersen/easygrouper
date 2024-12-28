@@ -256,13 +256,11 @@ def search_groups():
         if (word.startswith('"') and word.endswith('"')) or (word.startswith("'") and word.endswith("'")):
             word = word[1:-1]  # Remove quotes
             field_filters.extend([
-                f"(cn={word})",
-               # f"(description={word})"   # description must be in schema or this does not work 
+                f"(cn={word})"
             ])
         else:
             field_filters.extend([
-                f"(cn=*{word}*)",
-              #  f"(description=*{word}*)"  # description must be in schema or this does not work 
+                f"(cn=*{word}*)"
             ])
         
         # Add gidNumber search if word is numeric
