@@ -134,7 +134,7 @@ def search_users():
     words = quoted_terms + unquoted_terms
     
     # Build LDAP filter
-    search_attrs = [LDAP_ATTR_MAP[attr] for attr in ['id', 'name', 'email', 'jobtitle', 'department']]
+    search_attrs = [LDAP_USER_ATTR_MAP[attr] for attr in ['id', 'name', 'email', 'jobtitle', 'department']]
     
     # Build filter for each word
     word_filters = []
@@ -149,8 +149,8 @@ def search_users():
             attr_conditions.append(f'({attr}=*{word}*)')
         
         # Add uidNumber search if word is numeric
-        if word.isdigit() and 'uidNumber' in LDAP_ATTR_MAP:
-            attr_conditions.append(f'({LDAP_ATTR_MAP["uidNumber"]}={word})')
+        if word.isdigit() and 'uidNumber' in LDAP_USER_ATTR_MAP:
+            attr_conditions.append(f'({LDAP_USER_ATTR_MAP["uidNumber"]}={word})')
         
         if attr_conditions:
             # Combine attribute conditions with OR
@@ -166,7 +166,7 @@ def search_users():
     
     with get_ldap_connection() as conn:
         # Get all mapped LDAP attributes for the search
-        search_attributes = [LDAP_ATTR_MAP[attr] for attr in LDAP_ATTR_MAP.keys()]
+        search_attributes = [LDAP_USER_ATTR_MAP[attr] for attr in LDAP_USER_ATTR_MAP.keys()]
         
         conn.search(
             os.getenv('LDAP_BASE_DN_USER'),
@@ -178,8 +178,8 @@ def search_users():
         results = []
         for entry in conn.entries:
             # Check for required attributes
-            id_attr = LDAP_ATTR_MAP['id']
-            email_attr = LDAP_ATTR_MAP['email']
+            id_attr = LDAP_USER_ATTR_MAP['id']
+            email_attr = LDAP_USER_ATTR_MAP['email']
                 
             if not (hasattr(entry, email_attr) and getattr(entry, email_attr).value and 
                    hasattr(entry, id_attr) and getattr(entry, id_attr).value and 
@@ -188,7 +188,7 @@ def search_users():
                     
             # Build the result dictionary
             result = {}
-            for app_attr, ldap_attr in LDAP_ATTR_MAP.items():
+            for app_attr, ldap_attr in LDAP_USER_ATTR_MAP.items():
                 if hasattr(entry, ldap_attr):
                     value = getattr(entry, ldap_attr).value
                     result[app_attr] = '' if value in ['null', 'NULL', None, 'undefined', 'UNDEFINED'] else value
@@ -297,7 +297,7 @@ def search_groups():
                 members = entry.memberUid.values
             elif hasattr(entry, 'member') and entry.member.values:   # AD style
                 # Extract ID from each member DN based on available attribute
-                alt_id_attr = LDAP_ATTR_MAP.get('alt_id')
+                alt_id_attr = LDAP_USER_ATTR_MAP.get('alt_id')
                 for member_dn in entry.member.values:
                     try:
                         # First try to find uid in DN
@@ -320,8 +320,16 @@ def search_groups():
                     except Exception as e:
                         print(f"Error parsing member DN {member_dn}: {e}")
             
+            # Get group ID based on user ID attribute mapping, fallback to cn
+            group_id = None
+            id_attr = LDAP_ATTR_MAP['id']
+            if hasattr(entry, id_attr):
+                group_id = getattr(entry, id_attr).value
+            elif hasattr(entry, 'cn'):
+                group_id = entry.cn.value
+
             results.append({
-                "id": entry.cn.value,
+                "id": group_id,
                 "name": entry.cn.value,
                 "description": entry.description.value if hasattr(entry, 'description') else "",
                 "gidNumber": entry.gidNumber.value if hasattr(entry, 'gidNumber') else None,
