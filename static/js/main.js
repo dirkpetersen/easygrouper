@@ -241,11 +241,14 @@ function updateAddRemoveTab() {
                 }
             } else {
                 // Show all current members when no users are selected
-                displayMembers = currentMembers.map(id => ({
-                    id: id,
-                    name: id,
-                    isMember: true
-                }));
+                displayMembers = currentMembers.map(id => {
+                    const user = allSearchedUsers.get(id);
+                    return {
+                        id: id,
+                        name: user ? `${user.name || ''} (${user.id || ''})` : id,
+                        isMember: true
+                    };
+                });
                 addAllSection.style.display = 'none';
             }
 
@@ -254,11 +257,14 @@ function updateAddRemoveTab() {
             const selectedMembers = displayMembers.filter(user => user.isMember && selectedUsers.has(user.id));
             const nonSelectedMembers = currentMembers
                 .filter(id => !selectedUsers.has(id))
-                .map(id => ({
-                    id: id,
-                    name: id,
-                    isMember: true
-                }));
+                .map(id => {
+                    const user = allSearchedUsers.get(id);
+                    return {
+                        id: id,
+                        name: user ? `${user.name || ''} (${user.id || ''})` : id,
+                        isMember: true
+                    };
+                });
 
             // Pagination logic
             const itemsPerPage = 20;
