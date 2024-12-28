@@ -298,23 +298,16 @@ def search_groups():
             if hasattr(entry, 'memberUid') and entry.memberUid.values:  # OpenLDAP style
                 members = entry.memberUid.values
             elif hasattr(entry, 'member') and entry.member.values:   # AD style
-                # Extract ID from each member DN using alternative ID attribute
-                alt_id_attr = LDAP_ATTR_MAP.get('alt_id')
-                if alt_id_attr:
-                    for member_dn in entry.member.values:
-                        try:
-                            with get_ldap_connection() as conn:
-                                conn.search(
-                                    member_dn,  # Search this specific DN
-                                    '(objectClass=*)',
-                                    attributes=[alt_id_attr]
-                                )
-                                if conn.entries and hasattr(conn.entries[0], alt_id_attr):
-                                    alt_id = getattr(conn.entries[0], alt_id_attr).value
-                                    members.append(alt_id)
-                        except Exception as e:
-                            print(f"Error parsing member DN {member_dn}: {e}")
-                    dprint('Members:', members)
+                # Extract CN from each member DN
+                for member_dn in entry.member.values:
+                    try:
+                        # Find CN= in the DN and extract the value
+                        cn_match = re.search(r'CN=([^,]+)', member_dn, re.IGNORECASE)
+                        if cn_match:
+                            members.append(cn_match.group(1))
+                    except Exception as e:
+                        print(f"Error parsing member DN {member_dn}: {e}")
+                dprint('Members:', members)
             
             # Get group ID using configured ID attribute or fallbacks
             group_id = None
