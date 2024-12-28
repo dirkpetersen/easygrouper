@@ -79,13 +79,13 @@ function searchGroups() {
                 resultsDiv.innerHTML = groups.map(group => {
                     let memberDisplay;
                     if (!Array.isArray(group.members) || group.members.length === 0) {
-                        memberDisplay = 'None';
+                        memberDisplay = '<em>No members</em>';
                     } else {
                         const displayedMembers = group.members.slice(0, 10);
-                        const remainingCount = group.members.length - 10;
+                        const remainingCount = Math.max(0, group.members.length - 10);
                         memberDisplay = displayedMembers.join(', ');
                         if (remainingCount > 0) {
-                            memberDisplay += ` ... and ${remainingCount} more`;
+                            memberDisplay += ` <em>and ${remainingCount} more member${remainingCount === 1 ? '' : 's'}</em>`;
                         }
                     }
                     return `
