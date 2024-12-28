@@ -124,19 +124,37 @@ function toggleUser(id) {
 }
 
 function selectGroup(id, name) {
-    selectedGroup = { id, name };
-    updateSelectedGroup();
-    // Reset pagination when selecting a new group
-    const currentMembersList = document.getElementById('currentMembersList');
-    if (currentMembersList) {
-        currentMembersList.dataset.currentPage = '1';
-    }
-    document.querySelectorAll('.group-card').forEach(card => {
-        card.classList.remove('selected');
-        if (card.dataset.groupId === id) {
-            card.classList.add('selected');
-        }
-    });
+    // Store the exact group details when selected
+    fetch(`/api/groups/search?q=${encodeURIComponent(id)}`)
+        .then(response => response.json())
+        .then(groups => {
+            // Find the exact group by matching both id and name
+            const exactGroup = groups.find(g => g.id === id && g.name === name);
+            if (exactGroup) {
+                selectedGroup = { id: exactGroup.id, name: exactGroup.name };
+                updateSelectedGroup();
+                // Reset pagination when selecting a new group
+                const currentMembersList = document.getElementById('currentMembersList');
+                if (currentMembersList) {
+                    currentMembersList.dataset.currentPage = '1';
+                }
+                document.querySelectorAll('.group-card').forEach(card => {
+                    card.classList.remove('selected');
+                    if (card.dataset.groupId === id) {
+                        card.classList.add('selected');
+                    }
+                });
+            } else {
+                // If exact group not found, clear selection
+                selectedGroup = null;
+                updateSelectedGroup();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            selectedGroup = null;
+            updateSelectedGroup();
+        });
 }
 
 function updateSelectedUsers() {
