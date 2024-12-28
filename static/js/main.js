@@ -78,14 +78,14 @@ function searchGroups() {
                 selectedGroupSection.style.display = 'block';
                 resultsDiv.innerHTML = groups.map(group => {
                     let memberDisplay;
-                    if (group.members.length === 0) {
+                    if (!Array.isArray(group.members) || group.members.length === 0) {
                         memberDisplay = 'None';
                     } else {
                         const displayedMembers = group.members.slice(0, 10);
                         const remainingCount = group.members.length - 10;
                         memberDisplay = displayedMembers.join(', ');
                         if (remainingCount > 0) {
-                            memberDisplay += ` ... and ${remainingCount} more members`;
+                            memberDisplay += ` ... and ${remainingCount} more`;
                         }
                     }
                     return `
@@ -94,7 +94,7 @@ function searchGroups() {
                              data-group-id="${group.id}">
                             <h5>${group.name.length > 25 ? group.name.substring(0, 25) + '...' : group.name}</h5>
                             ${group.description ? `<p class="text-muted">${group.description}</p>` : ''}
-                            <p>Members: ${memberDisplay}</p>
+                            <p><strong>Members (${group.members.length}):</strong> ${memberDisplay}</p>
                         </div>
                     `;
                 }).join('');
