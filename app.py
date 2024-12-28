@@ -298,18 +298,11 @@ def search_groups():
             if hasattr(entry, 'memberUid') and entry.memberUid.values:  # OpenLDAP style
                 members = entry.memberUid.values
             elif hasattr(entry, 'member') and entry.member.values:   # AD style
-                # Extract ID from each member DN based on available attribute
+                # Extract ID from each member DN using alternative ID attribute
                 alt_id_attr = LDAP_ATTR_MAP.get('alt_id')
-                for member_dn in entry.member.values:
-                    try:
-                        # First try to find uid in DN
-                        dn_parts = [x.strip() for x in member_dn.split(',')]
-                        uid_part = next((x for x in dn_parts if x.upper().startswith('UID=')), None)
-                        if uid_part:
-                            uid = uid_part.split('=', 1)[1]
-                            members.append(uid)
-                        # If no uid, try alternative ID attribute (e.g., sAMAccountName)
-                        elif alt_id_attr:
+                if alt_id_attr:
+                    for member_dn in entry.member.values:
+                        try:
                             with get_ldap_connection() as conn:
                                 conn.search(
                                     member_dn,  # Search this specific DN
