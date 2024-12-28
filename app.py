@@ -320,12 +320,12 @@ def search_groups():
                     except Exception as e:
                         print(f"Error parsing member DN {member_dn}: {e}")
             
-            # Get group ID based on user ID attribute mapping, fallback to cn
+            # Get group ID using the configured ID attribute, fallback to cn only if needed
             group_id = None
             id_attr = LDAP_ATTR_MAP['id']
-            if hasattr(entry, id_attr):
+            if hasattr(entry, id_attr) and getattr(entry, id_attr).value:
                 group_id = getattr(entry, id_attr).value
-            elif hasattr(entry, 'cn'):
+            elif hasattr(entry, 'cn'):  # Fallback to cn only if primary ID is not available
                 group_id = entry.cn.value
 
             results.append({

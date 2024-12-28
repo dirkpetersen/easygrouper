@@ -90,7 +90,8 @@ function searchGroups() {
                     }
                     return `
                         <div class="group-card ${selectedGroup?.id === group.id ? 'selected' : ''}"
-                             onclick="selectGroup('${group.id}', '${group.name}')">
+                             onclick="selectGroup('${group.id}', '${group.name}')"
+                             data-group-id="${group.id}">
                             <h5>${group.name.length > 25 ? group.name.substring(0, 25) + '...' : group.name}</h5>
                             ${group.description ? `<p class="text-muted">${group.description}</p>` : ''}
                             <p>Members: ${memberDisplay}</p>
@@ -132,7 +133,7 @@ function selectGroup(id, name) {
     }
     document.querySelectorAll('.group-card').forEach(card => {
         card.classList.remove('selected');
-        if (card.onclick.toString().includes(`${id}`)) {
+        if (card.dataset.groupId === id) {
             card.classList.add('selected');
         }
     });
