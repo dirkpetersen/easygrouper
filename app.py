@@ -321,6 +321,7 @@ def search_groups():
                                     members.append(alt_id)
                     except Exception as e:
                         print(f"Error parsing member DN {member_dn}: {e}")
+                dprint('Members:', members)
             
             # Get group ID using configured ID attribute or fallbacks
             group_id = None
