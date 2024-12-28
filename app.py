@@ -312,9 +312,9 @@ def search_groups():
                                 if conn.entries and hasattr(conn.entries[0], alt_id_attr):
                                     alt_id = getattr(conn.entries[0], alt_id_attr).value
                                     members.append(alt_id)
-                    except Exception as e:
-                        print(f"Error parsing member DN {member_dn}: {e}")
-                dprint('Members:', members)
+                        except Exception as e:
+                            print(f"Error parsing member DN {member_dn}: {e}")
+                    dprint('Members:', members)
             
             # Get group ID using configured ID attribute or fallbacks
             group_id = None
