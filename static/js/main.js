@@ -94,7 +94,7 @@ function searchGroups() {
                              data-group-id="${group.id}">
                             <h5>${group.name.length > 25 ? group.name.substring(0, 25) + '...' : group.name}</h5>
                             ${group.description ? `<p class="text-muted">${group.description}</p>` : ''}
-                            <p><strong>Members (${group.members.length}):</strong> ${memberDisplay}</p>
+                            <p>Members (${group.members.length}): ${memberDisplay}</p>
                         </div>
                     `;
                 }).join('');
