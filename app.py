@@ -329,7 +329,7 @@ def search_groups():
             
     return jsonify(results)
 
-@app.route('/api/submit-changes', methods=['POST'])
+@app.route('/api/submit-changes', methods=['POST'])  # Removed DELETE method since we no longer handle removals
 def submit_changes():
     data = request.json
     group_id = data.get('group')

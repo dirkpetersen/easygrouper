@@ -249,24 +249,21 @@ function updateAddRemoveTab() {
                 addAllSection.style.display = 'none';
             }
 
-            // Split all members into add and remove arrays first
+            // Get non-member users for adding
             const allAddMembers = displayMembers.filter(user => !user.isMember);
-            const allRemoveMembers = displayMembers.filter(user => user.isMember);
 
             // Pagination logic
             const itemsPerPage = 20;
             const currentPage = parseInt(combinedMembersList.dataset.currentPage || '1');
             
-            // Calculate pagination for each column independently
+            // Calculate pagination
             const addStartIndex = (currentPage - 1) * itemsPerPage;
-            const removeStartIndex = (currentPage - 1) * itemsPerPage;
             
-            // Get current page members for each column
+            // Get current page members
             const addMembers = allAddMembers.slice(addStartIndex, addStartIndex + itemsPerPage);
-            const removeMembers = allRemoveMembers.slice(removeStartIndex, removeStartIndex + itemsPerPage);
             
-            // Calculate total pages based on the larger of the two arrays
-            const totalPages = Math.ceil(Math.max(allAddMembers.length, allRemoveMembers.length) / itemsPerPage);
+            // Calculate total pages
+            const totalPages = Math.ceil(allAddMembers.length / itemsPerPage);
 
             combinedMembersList.innerHTML = displayMembers.length === 0 ? 
                 '<p>No members to display</p>' : 
@@ -281,18 +278,7 @@ function updateAddRemoveTab() {
                                 </div>
                             `).join('')}
                         </div>
-                    ` : ''}
-                    ${removeMembers.length > 0 ? `
-                        <div class="members-column">
-                            <h5 class="text-danger mb-3">Users to Remove</h5>
-                            ${removeMembers.map(user => `
-                                <div class="user-item mb-2">
-                                    <span>${user.name}</span>
-                                    <button class="btn btn-sm btn-danger" onclick="removeMember('${user.id}')">Remove</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
+                    ` : '<p>No users to add</p>'}
                 </div>
                 ${totalPages > 1 ? `
                     <div class="pagination-controls mt-3">
@@ -379,28 +365,6 @@ function changeMembersPage(newPage) {
     updateAddRemoveTab();
 }
 
-function removeMember(userId) {
-    if (!selectedGroup) return;
-    
-    fetch('/api/submit-changes', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            users: [userId],
-            group: selectedGroup.id
-        })
-    })
-    .then(response => response.json())
-    .then(() => {
-        updateAddRemoveTab();
-    })
-    .catch(error => {
-        alert('Error removing member');
-        console.error('Error:', error);
-    });
-}
 
 // Initialize Bootstrap tabs
 document.addEventListener('DOMContentLoaded', function() {
