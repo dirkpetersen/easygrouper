@@ -284,7 +284,7 @@ def search_groups():
             os.getenv('LDAP_BASE_DN_GROUP'),
             ldap_filter,
             SUBTREE,
-            attributes=['cn', 'gidNumber', 'memberUid', 'member', 'description']
+            attributes=['cn', 'sAMAccountName', 'gidNumber', 'memberUid', 'member', 'description']
         )
 
         dprint('Entries:', conn.entries)
@@ -320,17 +320,18 @@ def search_groups():
                     except Exception as e:
                         print(f"Error parsing member DN {member_dn}: {e}")
             
-            # Get group ID using the configured ID attribute, fallback to cn only if needed
+            # Get group ID using sAMAccountName or another unique identifier
             group_id = None
-            id_attr = LDAP_ATTR_MAP['id']
-            if hasattr(entry, id_attr) and getattr(entry, id_attr).value:
-                group_id = getattr(entry, id_attr).value
-            elif hasattr(entry, 'cn'):  # Fallback to cn only if primary ID is not available
+            if hasattr(entry, 'sAMAccountName'):
+                group_id = entry.sAMAccountName.value
+            elif hasattr(entry, 'gidNumber'):  # Fallback to gidNumber if available
+                group_id = str(entry.gidNumber.value)
+            else:  # Last resort fallback to cn
                 group_id = entry.cn.value
 
             results.append({
                 "id": group_id,
-                "name": entry.cn.value,
+                "name": entry.cn.value,  # Display name remains as cn
                 "description": entry.description.value if hasattr(entry, 'description') else "",
                 "gidNumber": entry.gidNumber.value if hasattr(entry, 'gidNumber') else None,
                 "members": members
