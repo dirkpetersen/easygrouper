@@ -330,12 +330,15 @@ def search_groups():
             else:  # Last resort fallback to cn
                 group_id = entry.cn.value
 
+            # Sort members alphabetically for consistent display
+            sorted_members = sorted(members) if members else []
+            
             results.append({
                 "id": group_id,
                 "name": entry.cn.value,  # Display name remains as cn
                 "description": entry.description.value if hasattr(entry, 'description') else "",
                 "gidNumber": entry.gidNumber.value if hasattr(entry, 'gidNumber') else None,
-                "members": members
+                "members": sorted_members
             })
             
     return jsonify(results)
