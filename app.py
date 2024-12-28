@@ -35,7 +35,7 @@ def extract_quoted_terms(query):
 
 def parse_ldap_mappings():
     """Parse LDAP attribute mappings from environment variable"""
-    mapping_str = os.getenv('LDAP_ATTRIBUTES', 'id:cn name:displayName email:mail jobtitle:title department:department uidNumber:uidNumber')
+    mapping_str = os.getenv('LDAP_USER_ATTRIBUTES', 'id:cn name:displayName email:mail jobtitle:title department:department uidNumber:uidNumber')
     mappings = {}
     for pair in mapping_str.split():
         app_attr, ldap_attr = pair.split(':')
