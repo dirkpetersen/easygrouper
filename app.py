@@ -259,12 +259,12 @@ def search_groups():
         if (word.startswith('"') and word.endswith('"')) or (word.startswith("'") and word.endswith("'")):
             word = word[1:-1]  # Remove quotes
             field_filters.extend([
-                f"(sAMAccountName={word})",
+                f"({LDAP_ATTR_MAP['id']}={word})",
                 f"(cn={word})"
             ])
         else:
             field_filters.extend([
-                f"(sAMAccountName=*{word}*)",
+                f"({LDAP_ATTR_MAP['id']}=*{word}*)", 
                 f"(cn=*{word}*)"
             ])
         
